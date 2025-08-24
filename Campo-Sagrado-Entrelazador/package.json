@@ -19,7 +19,12 @@
     "test": "tests"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "estado-cero": "node scripts/estado-cero.js",
+    "consulta": "node scripts/consulta-sacral.js",
+    "jornada": "node scripts/nueva-jornada.js",
+    "documentacion": "node scripts/generar-documentacion.js",
+    "backup": "node scripts/backup-jornada.js",
+    "git-push": "git add . && git commit -m '🌟 Actualización automática' && git push"
   },
   "keywords": [],
   "author": "",
