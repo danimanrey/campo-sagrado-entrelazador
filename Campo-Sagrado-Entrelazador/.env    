@@ -1,0 +1,48 @@
+# Environment
+ENVIRONMENT=development
+DEBUG=True
+
+# API Keys (Get from respective services)
+ANTHROPIC_API_KEY=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
+
+
+# Location Settings (Madrid)
+LATITUDE=40.4168
+LONGITUDE=-3.7038
+TIMEZONE=Europe/Madrid
+LOCALE=es_ES
+
+# Prayer Calculation
+PRAYER_METHOD=3  # Muslim World League
+PRAYER_SCHOOL=0  # Shafi
+
+# Database
+DATABASE_URL=sqlite:///./database/campo_sagrado.db
+# For production: postgresql://user:pass@localhost:5432/campo_sagrado
+
+# Redis (Optional for caching)
+REDIS_URL=redis://localhost:6379/0
+
+# Paths
+ANYTYPE_EXPORT_PATH=./data/anytype-exports
+OBSIDIAN_VAULT_PATH=./data/obsidian-vault
+LOG_PATH=./logs
+
+# Sync Settings
+SYNC_INTERVAL_MINUTES=15
+BACKUP_INTERVAL_HOURS=24
+PATTERN_ANALYSIS_INTERVAL_HOURS=6
+
+# Algorithm Settings
+CONFIDENCE_THRESHOLD=0.6
+ENTROPY_THRESHOLD=0.7
+MIN_SATISFACTION_SCORE=7
+
+# Monitoring
+ENABLE_METRICS=True
+METRICS_PORT=9090
+HEALTH_CHECK_INTERVAL=60
+
+# Notifications
+ENABLE_NOTIFICATIONS=True
+NOTIFICATION_SOUND=True

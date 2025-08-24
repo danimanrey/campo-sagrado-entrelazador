@@ -1,0 +1,262 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// TABLA 1: TAREAS NO NEGOCIABLES
+model SacredTask {
+  id        String   @id @default(cuid())
+  name      String
+  category  TaskCategory
+  priority  Int      // 1-10, donde 1 es máxima prioridad
+  type      TaskType
+  
+  // Configuración temporal
+  idealTime Json?    // {hour: 5, minute: 0, duration: 30}
+  prayerAnchor String? // 'fajr', 'dhuhr', 'asr', 'maghrib', 'isha'
+  energyRequired Int  // 1-10
+  
+  // Restricciones y dependencias
+  dependencies String[] // Referencias a otras tareas
+  constraints Json?    // {before: 'task_id', after: 'task_id', requires_energy: 8}
+  nonNegotiable Boolean @default(false)
+  
+  // Tracking y patrones
+  completionHistory Json[] // [{date, duration, quality, energy_level}]
+  successPatterns Json?    // {best_time, best_energy, best_context}
+  resistancePatterns Json? // {common_blocks, skip_reasons}
+  
+  // Metadata
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+  lastCompleted DateTime? @map("last_completed")
+  streakCurrent Int      @default(0) @map("streak_current")
+  streakBest    Int      @default(0) @map("streak_best")
+  
+  // Relaciones
+  sacralDecisions SacralDecision[]
+  
+  @@map("sacred_tasks")
+}
+
+// TABLA 2: OBJETIVOS Y METAS
+model Objective {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  category    String?
+  
+  // Jerarquía
+  parentId    String?  @map("parent_id")
+  level       ObjectiveLevel
+  parent      Objective? @relation("ObjectiveHierarchy", fields: [parentId], references: [id])
+  children    Objective[] @relation("ObjectiveHierarchy")
+  
+  // Validación Sacral
+  sacralValidation Json? // {date, response: 'yes/no/pause', intensity: 8}
+  resonanceScore    Int?  // 0-100 @map("resonance_score")
+  lastConsulted     DateTime? @map("last_consulted")
+  
+  // Métricas
+  keyResults Json[] // [{metric, target, current, unit}]
+  progress   Decimal? @db.Decimal(5,2) // Porcentaje 0-100
+  momentum   Momentum?
+  
+  // Relaciones
+  relatedTasks     String[] // UUIDs de tareas relacionadas
+  blockingFactors  String[]
+  enablingFactors  String[]
+  
+  // Timeline
+  targetDate   DateTime? @map("target_date")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  completedAt  DateTime? @map("completed_at")
+  archived     Boolean   @default(false)
+  
+  // Relaciones
+  sacralDecisions SacralDecision[]
+  
+  @@map("objectives")
+}
+
+// TABLA 3: DECISIONES SACRALES
+model SacralDecision {
+  id      String @id @default(cuid())
+  question String
+  
+  // Contexto
+  context Json? // {location, energy_level, time_of_day, moon_phase}
+  
+  // Respuesta
+  response        DecisionResponse
+  intensity       Int // 1-10
+  bodySensation  String? @map("body_sensation")
+  
+  // Resultado y aprendizaje
+  actionTaken    String? @map("action_taken")
+  outcome        Json?   // {satisfaction: 8, aligned: true, lessons: []}
+  patternDetected String? @map("pattern_detected")
+  
+  // Relaciones
+  relatedTaskId     String? @map("related_task_id")
+  relatedObjectiveId String? @map("related_objective_id")
+  relatedTask       SacredTask? @relation(fields: [relatedTaskId], references: [id])
+  relatedObjective  Objective? @relation(fields: [relatedObjectiveId], references: [id])
+  
+  // Temporal
+  timestamp   DateTime @default(now())
+  prayerTime  String?  @map("prayer_time") // Momento de oración más cercano
+  hijriDate   String?  @map("hijri_date")
+  lunarPhase  String?  @map("lunar_phase")
+  
+  @@map("sacral_decisions")
+}
+
+// TABLA 4: PATRONES EMERGENTES
+model Pattern {
+  id          String @id @default(cuid())
+  patternType PatternType @map("pattern_type")
+  description String?
+  
+  // Detección
+  detectionMethod String? @map("detection_method")
+  confidence      Decimal @db.Decimal(3,2) // 0.00 a 1.00
+  occurrences     Int
+  
+  // Datos del patrón
+  patternData Json? // Estructura flexible para diferentes tipos
+  triggers    Json[] // Condiciones que activan el patrón
+  effects     Json[] // Consecuencias observadas
+  
+  // Recomendaciones
+  insights        String[]
+  recommendations Json[] // [{action, priority, expected_impact}]
+  
+  // Validación
+  validated         Boolean @default(false)
+  validationDate    DateTime? @map("validation_date")
+  effectivenessScore Int? @map("effectiveness_score") // 0-100
+  
+  // Temporal
+  firstDetected DateTime @default(now()) @map("first_detected")
+  lastObserved  DateTime? @map("last_observed")
+  active        Boolean @default(true)
+  
+  @@map("patterns")
+}
+
+// TABLA 5: SESIONES DE ESTADO CERO
+model ZeroStateSession {
+  id        String @id @default(cuid())
+  date      DateTime @db.Date
+  
+  // Calidad de la sesión
+  duration        Int // minutos
+  depthQuality    Int @map("depth_quality") // 1-10
+  clarityReceived Int @map("clarity_received") // 1-10
+  
+  // Orientación recibida
+  guidance           String?
+  prioritiesRevealed String[] @map("priorities_revealed")
+  insights           Json[]
+  
+  // Implementación
+  guidanceFollowed Boolean @default(false) @map("guidance_followed")
+  deviations        String[]
+  alignmentScore    Int? @map("alignment_score") // 0-100 al final del día
+  
+  // Contexto
+  energyBefore Int? @map("energy_before")
+  energyAfter  Int? @map("energy_after")
+  moonPhase    String? @map("moon_phase")
+  season       String?
+  
+  timestamp DateTime @default(now())
+  
+  @@map("zero_state_sessions")
+}
+
+// TABLA 6: CICLOS Y RITMOS
+model Cycle {
+  id        String @id @default(cuid())
+  cycleType CycleType @map("cycle_type")
+  phase     String?
+  
+  // Características
+  energyLevel        Int @map("energy_level")
+  optimalActivities  String[] @map("optimal_activities")
+  avoidActivities    String[] @map("avoid_activities")
+  
+  // Personalización
+  personalAdjustments Json?
+  discoveredPatterns  Json[] @map("discovered_patterns")
+  
+  // Tracking
+  currentPosition  Int @map("current_position") // Posición en el ciclo
+  nextTransition  DateTime? @map("next_transition")
+  
+  updatedAt DateTime @updatedAt @map("updated_at")
+  
+  @@map("cycles")
+}
+
+// ENUMS
+enum TaskCategory {
+  spiritual
+  physical
+  professional
+  creative
+  relational
+}
+
+enum TaskType {
+  daily
+  weekly
+  monthly
+  milestone
+}
+
+enum ObjectiveLevel {
+  vision
+  annual
+  quarterly
+  monthly
+  weekly
+}
+
+enum Momentum {
+  accelerating
+  steady
+  slowing
+  stalled
+}
+
+enum DecisionResponse {
+  yes
+  no
+  pause
+  unclear
+}
+
+enum PatternType {
+  energy
+  productivity
+  resistance
+  flow
+  synchronicity
+}
+
+enum CycleType {
+  circadian
+  weekly
+  lunar
+  seasonal
+  annual
+}

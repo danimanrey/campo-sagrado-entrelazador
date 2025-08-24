@@ -1,0 +1,18 @@
+# Core
+requests==2.31.0
+python-dateutil==2.8.2
+pytz==2024.1
+python-dotenv==1.0.0
+
+# Astronómico/Temporal
+astral==3.2
+hijri-converter==2.3.1
+lunarcalendar==0.0.9
+
+# Automatización
+schedule==1.2.0
+watchdog==3.0.0
+
+# Data
+pandas==2.1.4
+pyyaml==6.0.1

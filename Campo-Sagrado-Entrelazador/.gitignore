@@ -1,0 +1,56 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+.venv
+
+# Testing
+.coverage
+htmlcov/
+.pytest_cache/
+.tox/
+coverage.xml
+*.cover
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Logs
+logs/
+*.log
+
+# Database
+*.db
+*.sqlite3
+database/backups/*
+!database/backups/.gitkeep
+
+# Cache
+data/cache/*
+!data/cache/.gitkeep
+data/temp/*
+!data/temp/.gitkeep
+
+# Personal data
+data/anytype-exports/*
+!data/anytype-exports/.gitkeep
+data/obsidian-vault/.obsidian/*
+!data/obsidian-vault/.obsidian/plugins
+
+# Monitoring
+metrics/*
+!metrics/.gitkeep
